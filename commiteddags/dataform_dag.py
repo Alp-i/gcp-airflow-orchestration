@@ -17,7 +17,7 @@ REPOSITORY_ID = "rep"                # Your Dataform repo ID
 # DAG Definition
 # ===========================
 with DAG(
-    dag_id="dataform_main_workflow",
+    dag_id="dataform_wf",
     schedule_interval=None,  # Change to cron if you want automated runs
     start_date=days_ago(1),
     catchup=False,
