@@ -24,4 +24,4 @@ jobs:
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
           LOCATION: ${{ secrets.LOCATION }}
-          DAG_NAME: "dags"
+          DAG_NAME: ""
