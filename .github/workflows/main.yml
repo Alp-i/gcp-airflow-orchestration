@@ -1,0 +1,27 @@
+name: Sync DAGs to Cloud Composer
+
+on:
+  push:
+    branches:
+      - main   # run when you push to main
+
+jobs:
+  sync-dags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up credentials
+        run: |
+          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > $HOME/gcp-key.json
+        shell: bash
+
+      - name: Sync DAGs to Composer
+        uses: cristian-rincon/action-composer-sync@v0.1.0
+        with:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+          LOCATION: ${{ secrets.LOCATION }}
+          DAG_NAME: "dags"
