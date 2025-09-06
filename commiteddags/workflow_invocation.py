@@ -43,8 +43,7 @@ create_workflow_invocation = DataformCreateWorkflowInvocationOperator(
     repository_id=REPOSITORY_ID,
     asynchronous=True,
     workflow_invocation={
-        "compilation_result": "{{ task_instance.xcom_pull('create_compilation_result')['name'] }}",
-        "service_account": "377358662798-compute@developer.gserviceaccount.com"
+        "compilation_result": "{{ task_instance.xcom_pull('create_compilation_result')['name'] }}"
     }
 )
 
