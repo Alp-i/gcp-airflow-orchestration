@@ -58,4 +58,4 @@ is_workflow_invocation_done = DataformWorkflowInvocationStateSensor(
 )
 
 
-create_compilation_result >> create_workflow_invocation
+create_compilation_result >> create_workflow_invocation >> is_workflow_invocation_done
