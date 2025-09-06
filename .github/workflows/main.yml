@@ -3,7 +3,7 @@ name: Sync DAGs to Cloud Composer
 on:
   push:
     branches:
-      - main   # run when you push to main
+      - master   # run when you push to main
 
 jobs:
   sync-dags:
