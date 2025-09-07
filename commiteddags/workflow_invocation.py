@@ -56,5 +56,14 @@ is_workflow_invocation_done = DataformWorkflowInvocationStateSensor(
     expected_statuses={WorkflowInvocation.State.SUCCEEDED},
 )
 
+from airflow.sensors.external_task import ExternalTaskSensor
 
-create_compilation_result >> create_workflow_invocation >> is_workflow_invocation_done
+wait_for_dataflow_dag = ExternalTaskSensor(
+    task_id="wait_for_dataflow_dag",
+    external_dag_id="dataflow_only_dag",
+    external_task_id="wait_dataflow",
+    poke_interval=60,
+    timeout=3600,
+)
+
+wait_for_dataflow_dag >> create_compilation_result >> create_workflow_invocation >> is_workflow_invocation_done
