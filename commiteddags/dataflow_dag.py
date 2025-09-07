@@ -4,7 +4,7 @@ from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexT
 from airflow.models import Variable
 
 db_ip = Variable.get("mysql_ip")
-
+connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
 
 # Constants
 PROJECT_ID = "datapipeline-468807"
@@ -14,7 +14,7 @@ BODY = {
         "jobName": "df-customers-table",
         "containerSpecGcsPath": "gs://dataflow-templates-us-east1/latest/flex/MySQL_to_BigQuery",
         "parameters": {
-            "connectionURL": "jdbc:mysql://db_ip:3306/clothing_db",
+            "connectionURL": connection_url,
             "username": "root",
             "password": "54092021Aa!",
             "query": "SELECT * FROM customers",
