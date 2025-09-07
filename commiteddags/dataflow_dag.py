@@ -10,7 +10,7 @@ BODY = {
         "jobName": "df-customers-table",
         "containerSpecGcsPath": "gs://dataflow-templates-us-east1/latest/flex/MySQL_to_BigQuery",
         "parameters": {
-            "connectionURL": "jdbc:mysql://151.250.176.98:3306/clothing_db",
+            "connectionURL": "jdbc:mysql://176.233.210.106:3306/clothing_db",
             "username": "root",
             "password": "54092021Aa!",
             "query": "SELECT * FROM customers",
