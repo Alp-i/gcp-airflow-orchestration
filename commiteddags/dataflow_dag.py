@@ -1,6 +1,10 @@
 from datetime import datetime
 from airflow import models
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
+from airflow.models import Variable
+
+db_ip = Variable.get("mysql_ip")
+
 
 # Constants
 PROJECT_ID = "datapipeline-468807"
@@ -10,7 +14,7 @@ BODY = {
         "jobName": "df-customers-table",
         "containerSpecGcsPath": "gs://dataflow-templates-us-east1/latest/flex/MySQL_to_BigQuery",
         "parameters": {
-            "connectionURL": "jdbc:mysql://176.233.210.106:3306/clothing_db",
+            "connectionURL": "jdbc:mysql://db_ip:3306/clothing_db",
             "username": "root",
             "password": "54092021Aa!",
             "query": "SELECT * FROM customers",
