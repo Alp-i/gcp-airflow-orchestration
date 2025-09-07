@@ -60,8 +60,8 @@ from airflow.sensors.external_task import ExternalTaskSensor
 
 wait_for_dataflow_dag = ExternalTaskSensor(
     task_id="wait_for_dataflow_dag",
-    external_dag_id="dataflow_only_dag",
-    external_task_id="wait_dataflow",
+    external_dag_id="dataflow_customers_dag",
+    external_task_id="start_flex_template_job",
     poke_interval=60,
     timeout=3600,
 )
