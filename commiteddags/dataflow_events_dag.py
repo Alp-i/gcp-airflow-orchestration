@@ -64,16 +64,17 @@ with models.DAG(
         wait_until_finished=True,
     )
 
-    from airflow.providers.mysql.operators.mysql import MySqlOperator
+    from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
-    update_watermark_mysql = MySqlOperator(
-        task_id='update_watermark_mysql',
-        mysql_conn_id='my_mysql_conn',  # Define your MySQL connection in Airflow
+    update_watermark_task = SQLExecuteQueryOperator(
+        task_id="update_watermark",
+        conn_id="mysql_default",
         sql="""
-            UPDATE watermarks
-            SET last_processed_timestamp = UTC_TIMESTAMP()
-            WHERE table_name = 'sales_events';
+            INSERT INTO watermark_table (table_name, last_processed_timestamp)
+            VALUES ('sales_events', NOW()) ON DUPLICATE KEY
+            UPDATE
+                last_processed_timestamp = NOW();
             """
     )
 
-start_flex_template_job >> update_watermark_mysql
+start_flex_template_job >> update_watermark_task
