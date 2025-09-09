@@ -40,9 +40,9 @@ with models.DAG(
         location=LOCATION,
         do_xcom_push=True
     )
-    get_watermark_task = PythonOperator(
+    get_watermark_pyt= PythonOperator(
         task_id='get_watermark_task',
-        python_callable=get_watermark_callable,
+        python_callable=get_watermark_task,
         provide_context=True,
     )
 
@@ -57,7 +57,7 @@ with models.DAG(
                     "connectionURL": connection_url,
                     "username": "root",
                     "password": "54092021Aa!",
-                    "query": """SELECT * FROM sales_events WHERE timestamp > '{{ ti.xcom_pull(task_ids="get_watermark_task", key="last_watermark") }}'""",
+                    "query": """SELECT * FROM sales_events WHERE timestamp > '{{ ti.xcom_pull(task_ids="get_watermark_pyt", key="last_watermark") }}'""",
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                     "useColumnAlias": "false",
