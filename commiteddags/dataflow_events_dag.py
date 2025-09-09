@@ -1,7 +1,7 @@
 from datetime import datetime
 from airflow import models
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
-from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
+from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.models import Variable
 
 # Define Airflow Variables for connections and settings
@@ -27,7 +27,7 @@ with models.DAG(
 
     # Task 1: Get the last processed watermark from BigQuery
     # The result is pushed to XCom for the next task.
-    get_watermark_task = BigQueryExecuteQueryOperator(
+    get_watermark_task = BigQueryInsertJobOperator(
         task_id='get_watermark_task',
         sql=f"SELECT last_processed_timestamp FROM `{WATERMARK_TABLE}` WHERE table_name = '{SOURCE_TABLE}'",
         use_legacy_sql=False,
@@ -76,7 +76,7 @@ with models.DAG(
     )
 
     # Task 3: Update the watermark in BigQuery
-    update_watermark_task = BigQueryExecuteQueryOperator(
+    update_watermark_task = BigQueryInsertJobOperator(
         task_id="update_watermark",
         sql=f"""
             MERGE `{WATERMARK_TABLE}` AS T
