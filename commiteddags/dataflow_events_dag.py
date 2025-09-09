@@ -14,7 +14,7 @@ LOCATION = "us-east1"
 DATASET_ID = "landingzone"
 SOURCE_TABLE = "sales_events"
 WATERMARK_TABLE = f"{PROJECT_ID}.{DATASET_ID}.watermark_table"
-LANDING_ZONE_TABLE = f"{PROJECT_ID}.{DATASET_ID}.clothing_db_sales_events"
+LANDING_ZONE_TABLE = f"{PROJECT_ID}.{DATASET_ID}.clothing_db_events_batch"
 
 # DAG definition
 with models.DAG(
