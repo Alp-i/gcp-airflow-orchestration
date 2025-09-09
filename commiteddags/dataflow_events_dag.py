@@ -25,10 +25,10 @@ with models.DAG(
     catchup=False,
     tags=['dataflow', 'incremental'],
 ) as dag:
-
-    # Task 1: Get the last processed watermark from BigQuery
-    # The result is pushed to XCom for the next task
-    get_watermark_task = BigQueryInsertJobOperator(
+    def get_watermark_call(**kwargs):
+        ti = kwargs['ti']
+        # BigQueryExecuteQueryOperator is a simpler way to pull results
+        bq_op = BigQueryInsertJobOperator(
         task_id='get_watermark_task',
         configuration={
             "query": {
@@ -40,9 +40,15 @@ with models.DAG(
         location=LOCATION,
         do_xcom_push=True
     )
+        result = bq_op.execute(kwargs)
+        last_watermark = result[0][0] if result and result[0] else '1970-01-01 00:00:00'
+        ti.xcom_push(key='last_watermark', value=last_watermark)
+
+
+
     get_watermark_pyt= PythonOperator(
         task_id='get_watermark_pyt',
-        python_callable=get_watermark_task,
+        python_callable=get_watermark_call,
         provide_context=True,
     )
 
@@ -110,4 +116,4 @@ with models.DAG(
     )
 
     # Define the task dependencies
-    get_watermark_task >> start_flex_template_job >> update_watermark_task
+    get_watermark_pyt >> start_flex_template_job >> update_watermark_task
