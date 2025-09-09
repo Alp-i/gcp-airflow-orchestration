@@ -42,14 +42,8 @@ with models.DAG(
     # Get the last watermark from XCom
     last_watermark = "{{ ti.xcom_pull(task_ids='get_watermark_task', key='return_value')[0][0] }}"
     # Fallback if None
-    last_watermark = last_watermark or "1970-01-01 00:00:00"
 
     # Make sure it's wrapped in quotes for SQL
-    query = f"""
-    SELECT *
-    FROM {SOURCE_TABLE}
-    WHERE timestamp > '{last_watermark}'
-    """
 
     start_flex_template_job = DataflowStartFlexTemplateOperator(
         task_id="start_flex_template_job",
@@ -62,7 +56,7 @@ with models.DAG(
                     "connectionURL": connection_url,
                     "username": "root",
                     "password": "54092021Aa!",
-                    "query": query,
+                    "query": f"""SELECT * FROM {SOURCE_TABLE} WHERE timestamp > '{last_watermark}'""",
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                     "useColumnAlias": "false",
