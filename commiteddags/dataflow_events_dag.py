@@ -27,7 +27,7 @@ with models.DAG(
 ) as dag:
 
     # Task 1: Get the last processed watermark from BigQuery
-    # The result is pushed to XCom for the next task.
+    # The result is pushed to XCom for the next task
     get_watermark_task = BigQueryInsertJobOperator(
         task_id='get_watermark_task',
         configuration={
