@@ -70,7 +70,7 @@ with models.DAG(
         task_id="update_watermark",
         conn_id="mysql_conn",
         sql="""
-            INSERT INTO watermark_table (table_name, last_processed_timestamp)
+            INSERT INTO watermarks (table_name, last_processed_timestamp)
             VALUES ('sales_events', NOW()) ON DUPLICATE KEY
             UPDATE
                 last_processed_timestamp = NOW();
