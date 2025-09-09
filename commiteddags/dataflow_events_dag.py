@@ -68,7 +68,7 @@ with models.DAG(
 
     update_watermark_task = SQLExecuteQueryOperator(
         task_id="update_watermark",
-        conn_id="mysql_default",
+        conn_id="mysql_conn",
         sql="""
             INSERT INTO watermark_table (table_name, last_processed_timestamp)
             VALUES ('sales_events', NOW()) ON DUPLICATE KEY
