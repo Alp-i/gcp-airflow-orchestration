@@ -41,7 +41,6 @@ with models.DAG(
     )
     # Get the last watermark from XCom
     #last_watermark = "{{ ti.xcom_pull(task_ids='get_watermark_task', key='return_value')[0][0] }}"
-    # Fallback if None
 
     # Make sure it's wrapped in quotes for SQL
 
