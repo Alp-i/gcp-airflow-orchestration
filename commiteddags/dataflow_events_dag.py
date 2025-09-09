@@ -40,7 +40,7 @@ with models.DAG(
         do_xcom_push=True
     )
     # Get the last watermark from XCom
-    last_watermark = "{{ ti.xcom_pull(task_ids='get_watermark_task', key='return_value')[0][0] }}"
+    #last_watermark = "{{ ti.xcom_pull(task_ids='get_watermark_task', key='return_value')[0][0] }}"
     # Fallback if None
 
     # Make sure it's wrapped in quotes for SQL
@@ -56,7 +56,7 @@ with models.DAG(
                     "connectionURL": connection_url,
                     "username": "root",
                     "password": "54092021Aa!",
-                    "query": f"""SELECT * FROM {SOURCE_TABLE} WHERE timestamp > '{last_watermark}'""",
+                    "query": """SELECT * FROM sales_events WHERE timestamp > '{{ ti.xcom_pull(task_ids="get_watermark_task", key="return_value")[0][0] }}'""",
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                     "useColumnAlias": "false",
