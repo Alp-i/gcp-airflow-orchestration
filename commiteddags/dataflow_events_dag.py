@@ -115,5 +115,5 @@ with models.DAG(
         location=LOCATION
     )
 
-    # Define the task dependencies
+    # Define the task dependencie
     get_watermark_pyt >> start_flex_template_job >> update_watermark_task
