@@ -29,10 +29,15 @@ with models.DAG(
     # The result is pushed to XCom for the next task.
     get_watermark_task = BigQueryInsertJobOperator(
         task_id='get_watermark_task',
-        sql=f"SELECT last_processed_timestamp FROM `{WATERMARK_TABLE}` WHERE table_name = '{SOURCE_TABLE}'",
-        use_legacy_sql=False,
+        configuration={
+            "query": {
+                "query": f"SELECT last_processed_timestamp FROM `{WATERMARK_TABLE}` WHERE table_name = '{SOURCE_TABLE}'",
+                "useLegacySql": False,
+            }
+        },
         gcp_conn_id='google_cloud_default',
-        do_xcom_push=True,
+        location=LOCATION,
+        do_xcom_push=True
     )
 
     # Task 2: Start the Dataflow job with the dynamic query
@@ -78,22 +83,27 @@ with models.DAG(
     # Task 3: Update the watermark in BigQuery
     update_watermark_task = BigQueryInsertJobOperator(
         task_id="update_watermark",
-        sql=f"""
-            MERGE `{WATERMARK_TABLE}` AS T
-            USING (
-              SELECT '{SOURCE_TABLE}' AS table_name, MAX(timestamp) AS new_watermark
-              FROM `{LANDING_ZONE_TABLE}`
-            ) AS S
-            ON T.table_name = S.table_name
+        configuration={
+            "query": {
+                "query": f"""
+                    MERGE `{WATERMARK_TABLE}` AS T
+                    USING (
+                      SELECT '{SOURCE_TABLE}' AS table_name, MAX(timestamp) AS new_watermark
+                      FROM `{LANDING_ZONE_TABLE}`
+                    ) AS S
+                    ON T.table_name = S.table_name
 
-            WHEN MATCHED THEN
-              UPDATE SET last_processed_timestamp = S.new_watermark
+                    WHEN MATCHED THEN
+                      UPDATE SET last_processed_timestamp = S.new_watermark
 
-            WHEN NOT MATCHED THEN
-              INSERT (table_name, last_processed_timestamp) VALUES(S.table_name, S.new_watermark);
-        """,
-        use_legacy_sql=False,
+                    WHEN NOT MATCHED THEN
+                      INSERT (table_name, last_processed_timestamp) VALUES(S.table_name, S.new_watermark);
+                """,
+                "useLegacySql": False,
+            }
+        },
         gcp_conn_id='google_cloud_default',
+        location=LOCATION
     )
 
     # Define the task dependencies
