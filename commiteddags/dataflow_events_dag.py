@@ -41,7 +41,7 @@ with models.DAG(
         do_xcom_push=True
     )
     get_watermark_pyt= PythonOperator(
-        task_id='get_watermark_task',
+        task_id='get_watermark_pyt',
         python_callable=get_watermark_task,
         provide_context=True,
     )
