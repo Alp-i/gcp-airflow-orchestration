@@ -39,10 +39,18 @@ with models.DAG(
         location=LOCATION,
         do_xcom_push=True
     )
+    # Get the last watermark from XCom
     last_watermark = "{{ ti.xcom_pull(task_ids='get_watermark_task', key='return_value')[0][0] }}"
-    # Task 2: Start the Dataflow job with the dynamic query
-    # The query is built dynamically to filter data.
-    # The `{{ ti.xcom_pull(...) }}` is Jinja templating to get the watermark from the previous task.
+    # Fallback if None
+    last_watermark = last_watermark or "1970-01-01 00:00:00"
+
+    # Make sure it's wrapped in quotes for SQL
+    query = f"""
+    SELECT *
+    FROM {SOURCE_TABLE}
+    WHERE timestamp > '{last_watermark}'
+    """
+
     start_flex_template_job = DataflowStartFlexTemplateOperator(
         task_id="start_flex_template_job",
         project_id=PROJECT_ID,
@@ -54,7 +62,7 @@ with models.DAG(
                     "connectionURL": connection_url,
                     "username": "root",
                     "password": "54092021Aa!",
-                    "query": f"SELECT * FROM {SOURCE_TABLE} WHERE timestamp > last_watermark",
+                    "query": query,
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                     "useColumnAlias": "false",
