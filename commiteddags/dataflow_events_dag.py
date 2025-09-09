@@ -3,7 +3,8 @@ from airflow import models
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.models import Variable
-
+from airflow.operators.python import PythonOperator
+import pendulum
 # Define Airflow Variables for connections and settings
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
@@ -39,10 +40,11 @@ with models.DAG(
         location=LOCATION,
         do_xcom_push=True
     )
-    # Get the last watermark from XCom
-    #last_watermark = "{{ ti.xcom_pull(task_ids='get_watermark_task', key='return_value')[0][0] }}"
-
-    # Make sure it's wrapped in quotes for SQL
+    get_watermark_task = PythonOperator(
+        task_id='get_watermark_task',
+        python_callable=get_watermark_callable,
+        provide_context=True,
+    )
 
     start_flex_template_job = DataflowStartFlexTemplateOperator(
         task_id="start_flex_template_job",
@@ -55,7 +57,7 @@ with models.DAG(
                     "connectionURL": connection_url,
                     "username": "root",
                     "password": "54092021Aa!",
-                    "query": """SELECT * FROM sales_events WHERE timestamp > '{{ ti.xcom_pull(task_ids="get_watermark_task", key="return_value")[0][0] }}'""",
+                    "query": """SELECT * FROM sales_events WHERE timestamp > '{{ ti.xcom_pull(task_ids="get_watermark_task", key="last_watermark") }}'""",
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                     "useColumnAlias": "false",
