@@ -3,8 +3,7 @@ from airflow import models
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.models import Variable
-from airflow.operators.python import PythonOperator
-import pendulum
+
 # Define Airflow Variables for connections and settings
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
@@ -25,32 +24,8 @@ with models.DAG(
     catchup=False,
     tags=['dataflow', 'incremental'],
 ) as dag:
-    def get_watermark_call(**kwargs):
-        ti = kwargs['ti']
-        # BigQueryExecuteQueryOperator is a simpler way to pull results
-        bq_op = BigQueryInsertJobOperator(
-        task_id='get_watermark_task',
-        configuration={
-            "query": {
-                "query": f"SELECT last_processed_timestamp FROM `{WATERMARK_TABLE}` WHERE table_name = '{SOURCE_TABLE}'",
-                "useLegacySql": False,
-            }
-        },
-        gcp_conn_id='google_cloud_default',
-        location=LOCATION,
-        do_xcom_push=True
-    )
-        result = bq_op.execute(kwargs)
-        last_watermark = result[0][0] if result and result[0] else '1970-01-01 00:00:00'
-        ti.xcom_push(key='last_watermark', value=last_watermark)
 
 
-
-    get_watermark_pyt= PythonOperator(
-        task_id='get_watermark_pyt',
-        python_callable=get_watermark_call,
-        provide_context=True,
-    )
 
     start_flex_template_job = DataflowStartFlexTemplateOperator(
         task_id="start_flex_template_job",
@@ -63,7 +38,7 @@ with models.DAG(
                     "connectionURL": connection_url,
                     "username": "root",
                     "password": "54092021Aa!",
-                    "query": """SELECT * FROM sales_events WHERE timestamp > '{{ ti.xcom_pull(task_ids="get_watermark_pyt", key="last_watermark") }}'""",
+                    "query": """SELECT * FROM sales_events  WHERE timestamp > (SELECT last_processed_timestamp FROM watermarks WHERE table_name='sales_events');""",
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                     "useColumnAlias": "false",
@@ -89,31 +64,16 @@ with models.DAG(
         wait_until_finished=True,
     )
 
-    # Task 3: Update the watermark in BigQuery
-    update_watermark_task = BigQueryInsertJobOperator(
-        task_id="update_watermark",
-        configuration={
-            "query": {
-                "query": f"""
-                    MERGE `{WATERMARK_TABLE}` AS T
-                    USING (
-                      SELECT '{SOURCE_TABLE}' AS table_name, MAX(timestamp) AS new_watermark
-                      FROM `{LANDING_ZONE_TABLE}`
-                    ) AS S
-                    ON T.table_name = S.table_name
+    from airflow.providers.mysql.operators.mysql import MySqlOperator
 
-                    WHEN MATCHED THEN
-                      UPDATE SET last_processed_timestamp = S.new_watermark
-
-                    WHEN NOT MATCHED THEN
-                      INSERT (table_name, last_processed_timestamp) VALUES(S.table_name, S.new_watermark);
-                """,
-                "useLegacySql": False,
-            }
-        },
-        gcp_conn_id='google_cloud_default',
-        location=LOCATION
+    update_watermark_mysql = MySqlOperator(
+        task_id='update_watermark_mysql',
+        mysql_conn_id='my_mysql_conn',  # Define your MySQL connection in Airflow
+        sql="""
+            UPDATE watermarks
+            SET last_processed_timestamp = UTC_TIMESTAMP()
+            WHERE table_name = 'sales_events';
+            """
     )
 
-    # Define the task dependencie
-    get_watermark_pyt >> start_flex_template_job >> update_watermark_task
+start_flex_template_job >> update_watermark_mysql
