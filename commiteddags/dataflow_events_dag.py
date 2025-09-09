@@ -8,7 +8,7 @@ from airflow.models import Variable
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
 
-# Constants
+# Constant
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
 DATASET_ID = "landingzone"
