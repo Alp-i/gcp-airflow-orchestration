@@ -76,5 +76,5 @@ with models.DAG(
                 last_processed_timestamp = NOW();
             """
     )
-
+#test
 start_flex_template_job >> update_watermark_task
