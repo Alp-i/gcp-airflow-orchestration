@@ -9,16 +9,6 @@ db_password = Variable.get("mysql_password")
 # Constants
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
-
-start_flex_template_job = DataflowStartFlexTemplateOperator(
-        task_id="start_flex_template_job",
-        project_id=PROJECT_ID,
-        body=BODY,
-        location=LOCATION,
-        append_job_name=False,
-        wait_until_finished=True,  # Non-deferrable: DAG waits until job finishes
-    )
-
 BODY = {
     "launch_parameter": {
         "jobName": "df-customers-table",
@@ -26,7 +16,7 @@ BODY = {
         "parameters": {
             "connectionURL": connection_url,
             "username": "root",
-            "password": "db_password",
+            "password": db_password,
             "query": "SELECT * FROM customers WHERE load_timestamp > (SELECT last_processed_timestamp FROM watermarks WHERE table_name='customers');",
             "outputTable": "datapipeline-468807:landingzone.clothing_db_customers_copy",
             "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
@@ -49,6 +39,14 @@ BODY = {
         }
     }
 }
+start_flex_template_job = DataflowStartFlexTemplateOperator(
+        task_id="start_flex_template_job",
+        project_id=PROJECT_ID,
+        body=BODY,
+        location=LOCATION,
+        append_job_name=False,
+        wait_until_finished=True,  # Non-deferrable: DAG waits until job finishes
+    )
 
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
