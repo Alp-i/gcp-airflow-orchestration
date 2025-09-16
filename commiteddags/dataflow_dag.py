@@ -68,5 +68,5 @@ with models.DAG(
             UPDATE last_processed_timestamp = UTC_DATE() + INTERVAL 4 HOUR;;
             """
     )
-    #This is a test.
+    #This is a test. THIS IS A TEST
     start_flex_template_job >> update_watermark_task
