@@ -40,7 +40,7 @@ BODY = {
     }
 }
 start_flex_template_job = DataflowStartFlexTemplateOperator(
-        task_id="start_flex_template_job",
+        task_id="start_flex_template_customer_job",
         project_id=PROJECT_ID,
         body=BODY,
         location=LOCATION,
@@ -51,7 +51,7 @@ start_flex_template_job = DataflowStartFlexTemplateOperator(
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 update_watermark_task = SQLExecuteQueryOperator(
-        task_id="update_watermark",
+        task_id="update_watermark_customer",
         conn_id="mysql_conn",
         sql="""
             INSERT INTO watermarks (table_name, last_processed_timestamp)
