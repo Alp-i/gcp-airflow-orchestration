@@ -18,12 +18,6 @@ with models.DAG(
     tags=["gcp", "dataflow", "mysql"]
 ) as dag:
 
-    # Correcting the labels field to be a dictionary, not a string
-    labels_dict = {
-        "goog-dataflow-provided-template-version": "2025-08-26-00_rc00",
-        "goog-dataflow-provided-template-name": "mysql_to_bigquery",
-        "goog-dataflow-provided-template-type": "flex"
-    }
 
     BODY = {
         "launch_parameter": {
@@ -45,7 +39,7 @@ with models.DAG(
                 "stagingLocation": "gs://dataflow-staging-us-east1-377358662798/staging",
                 "autoscalingAlgorithm": "NONE",
                 "serviceAccount": "377358662798-compute@developer.gserviceaccount.com",
-                "labels": labels_dict,  # Use the corrected dictionary here
+                "labels": "{\"goog-dataflow-provided-template-version\":\"2025-08-26-00_rc00\",\"goog-dataflow-provided-template-name\":\"mysql_to_bigquery\",\"goog-dataflow-provided-template-type\":\"flex\"}",  # Use the corrected dictionary here
             },
             "environment": {
                 "numWorkers": 2,
@@ -74,5 +68,5 @@ with models.DAG(
             UPDATE last_processed_timestamp = UTC_DATE() + INTERVAL 4 HOUR;;
             """
     )
-
+    #This is a test.
     start_flex_template_job >> update_watermark_task
