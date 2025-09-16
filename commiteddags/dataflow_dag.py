@@ -5,7 +5,7 @@ from airflow.models import Variable
 
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
-
+db_password = Variable.get("mysql_password")
 # Constants
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
@@ -16,8 +16,8 @@ BODY = {
         "parameters": {
             "connectionURL": connection_url,
             "username": "root",
-            "password": "54092021Aa!",
-            "query": "SELECT * FROM customers",
+            "password": "db_password",
+            "query": "SELECT * FROM customers WHERE load_timestamp > (SELECT last_processed_timestamp FROM watermarks WHERE table_name='customers');",
             "outputTable": "datapipeline-468807:landingzone.clothing_db_customers_copy",
             "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
             "useColumnAlias": "false",
@@ -39,6 +39,19 @@ BODY = {
         }
     }
 }
+
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+
+    update_watermark_task = SQLExecuteQueryOperator(
+        task_id="update_watermark",
+        conn_id="mysql_conn",
+        sql="""
+            INSERT INTO watermarks (table_name, last_processed_timestamp)
+            VALUES ('customers', UTC_DATE() + INTERVAL 4 HOUR) ON DUPLICATE KEY
+            UPDATE
+                last_processed_timestamp = UTC_DATE() + INTERVAL 4 HOUR;
+            """
+    )
 
 # DAG definition
 with models.DAG(
