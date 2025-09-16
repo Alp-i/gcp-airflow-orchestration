@@ -13,7 +13,7 @@ LOCATION = "us-east1"
 with models.DAG(
     dag_id="mysql_to_bq_customers",
     start_date=datetime(2025, 1, 1),
-    schedule_interval="@daily",
+    schedule_interval="0 4 * * *",
     catchup=False,
     tags=["gcp", "dataflow", "mysql"]
 ) as dag:
