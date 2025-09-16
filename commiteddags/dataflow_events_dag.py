@@ -7,7 +7,7 @@ from airflow.models import Variable
 # Define Airflow Variables for connections and settings
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
-
+db_password = Variable.get("mysql_password")
 # Constant
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
@@ -37,7 +37,7 @@ with models.DAG(
                 "parameters": {
                     "connectionURL": connection_url,
                     "username": "root",
-                    "password": "54092021Aa!",
+                    "password": db_password,
                     "query": """SELECT * FROM sales_events  WHERE timestamp > (SELECT last_processed_timestamp FROM watermarks WHERE table_name='sales_events');""",
                     "outputTable": LANDING_ZONE_TABLE,
                     "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
