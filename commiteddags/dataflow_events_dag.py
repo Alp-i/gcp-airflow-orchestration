@@ -28,7 +28,7 @@ with models.DAG(
 
 
     start_flex_template_job = DataflowStartFlexTemplateOperator(
-        task_id="start_flex_template_job",
+        task_id="start_flex_template_job_sales",
         project_id=PROJECT_ID,
         body={
             "launch_parameter": {
