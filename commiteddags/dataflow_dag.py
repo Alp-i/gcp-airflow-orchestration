@@ -45,7 +45,7 @@ with models.DAG(
     "dataflow_customers_dag",
     schedule_interval='@once',
     start_date=datetime(2025, 9, 6),
-    catchup=False,
+    catchup=True,
     tags=['dataflow'],
 ) as dag:
 
