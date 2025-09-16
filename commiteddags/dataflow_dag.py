@@ -42,7 +42,7 @@ BODY = {
 
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
-    update_watermark_task = SQLExecuteQueryOperator(
+update_watermark_task = SQLExecuteQueryOperator(
         task_id="update_watermark",
         conn_id="mysql_conn",
         sql="""
