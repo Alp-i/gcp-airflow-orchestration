@@ -2,6 +2,7 @@ from datetime import datetime
 from airflow import models
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 from airflow.models import Variable
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
@@ -16,7 +17,7 @@ with models.DAG(
     catchup=False,
 ) as dag:
 
-BODY = {
+    BODY = {
     "launch_parameter": {
         "jobName": "df-customers-table",
         "containerSpecGcsPath": "gs://dataflow-templates-us-east1/latest/flex/MySQL_to_BigQuery",
@@ -47,7 +48,7 @@ BODY = {
     }
 }
 
-start_flex_template_job = DataflowStartFlexTemplateOperator(
+    start_flex_template_job = DataflowStartFlexTemplateOperator(
         task_id="start_flex_template_customer_job",
         project_id=PROJECT_ID,
         body=BODY,
@@ -56,9 +57,9 @@ start_flex_template_job = DataflowStartFlexTemplateOperator(
         wait_until_finished=True,  # Non-deferrable: DAG waits until job finish
     )
 
-from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
-update_watermark_task = SQLExecuteQueryOperator(
+
+    update_watermark_task = SQLExecuteQueryOperator(
         task_id="update_watermark_customer",
         conn_id="mysql_conn",
         sql="""
@@ -69,5 +70,5 @@ update_watermark_task = SQLExecuteQueryOperator(
             """
     )
 
-start_flex_template_job >> update_watermark_task
+    start_flex_template_job >> update_watermark_task
 

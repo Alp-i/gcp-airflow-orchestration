@@ -77,4 +77,4 @@ with models.DAG(
             """
     )
 #test
-start_flex_template_job >> update_watermark_task
+    start_flex_template_job >> update_watermark_task
