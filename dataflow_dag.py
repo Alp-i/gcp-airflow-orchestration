@@ -9,14 +9,6 @@ db_password = Variable.get("mysql_password")
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
 
-start_flex_template_job = DataflowStartFlexTemplateOperator(
-        task_id="start_flex_template_customer_job",
-        project_id=PROJECT_ID,
-        body=BODY,
-        location=LOCATION,
-        append_job_name=False,
-        wait_until_finished=True,  # Non-deferrable: DAG waits until job finish
-    )
 
 BODY = {
     "launch_parameter": {
@@ -49,7 +41,14 @@ BODY = {
     }
 }
 
-
+start_flex_template_job = DataflowStartFlexTemplateOperator(
+        task_id="start_flex_template_customer_job",
+        project_id=PROJECT_ID,
+        body=BODY,
+        location=LOCATION,
+        append_job_name=False,
+        wait_until_finished=True,  # Non-deferrable: DAG waits until job finish
+    )
 
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
