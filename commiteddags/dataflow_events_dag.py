@@ -71,9 +71,9 @@ with models.DAG(
         conn_id="mysql_conn",
         sql="""
             INSERT INTO watermarks (table_name, last_processed_timestamp)
-            VALUES ('sales_events', NOW()) ON DUPLICATE KEY
+            VALUES ('sales_events', UTC_DATE() + INTERVAL 4 HOUR) ON DUPLICATE KEY
             UPDATE
-                last_processed_timestamp = NOW();
+                last_processed_timestamp = UTC_DATE() + INTERVAL 4 HOUR;
             """
     )
 #test
