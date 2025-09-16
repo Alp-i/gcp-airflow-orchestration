@@ -9,6 +9,12 @@ db_password = Variable.get("mysql_password")
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
 
+with models.DAG(
+    dag_id="mysql_to_bq_customers",
+    start_date=datetime(2025, 1, 1),
+    schedule_interval="@daily",   # or None if you only trigger manually
+    catchup=False,
+) as dag:
 
 BODY = {
     "launch_parameter": {
@@ -63,5 +69,5 @@ update_watermark_task = SQLExecuteQueryOperator(
             """
     )
 
-
+start_flex_template_job >> update_watermark_task
 
