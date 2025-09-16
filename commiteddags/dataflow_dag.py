@@ -6,9 +6,18 @@ from airflow.models import Variable
 db_ip = Variable.get("mysql_ip")
 connection_url = f"jdbc:mysql://{db_ip}:3306/clothing_db"
 db_password = Variable.get("mysql_password")
-# Constants
 PROJECT_ID = "datapipeline-468807"
 LOCATION = "us-east1"
+
+start_flex_template_job = DataflowStartFlexTemplateOperator(
+        task_id="start_flex_template_customer_job",
+        project_id=PROJECT_ID,
+        body=BODY,
+        location=LOCATION,
+        append_job_name=False,
+        wait_until_finished=True,  # Non-deferrable: DAG waits until job finish
+    )
+
 BODY = {
     "launch_parameter": {
         "jobName": "df-customers-table",
@@ -40,14 +49,7 @@ BODY = {
     }
 }
 
-start_flex_template_job = DataflowStartFlexTemplateOperator(
-        task_id="start_flex_template_customer_job",
-        project_id=PROJECT_ID,
-        body=BODY,
-        location=LOCATION,
-        append_job_name=False,
-        wait_until_finished=True,  # Non-deferrable: DAG waits until job finish
-    )
+
 
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
