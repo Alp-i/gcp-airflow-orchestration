@@ -28,7 +28,7 @@ with models.DAG(
                 "username": "root",
                 "password": db_password,
                 "query": "SELECT * FROM customers WHERE load_timestamp > (SELECT last_processed_timestamp FROM watermarks WHERE table_name='customers');",
-                "outputTable": "datapipeline-468807:landingzone.clothing_db_customers_copy",
+                "outputTable": "datapipeline-468807:landingzone.clothing_db_customers",
                 "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                 "useColumnAlias": "false",
                 "isTruncate": "false",
@@ -68,5 +68,5 @@ with models.DAG(
             UPDATE last_processed_timestamp = UTC_DATE() + INTERVAL 4 HOUR;;
             """
     )
-    #This is a test. THIS IS A TEST
+    #This is a test. THIS IS A TEST this is a test for youtube
     start_flex_template_job >> update_watermark_task
