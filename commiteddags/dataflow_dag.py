@@ -28,7 +28,7 @@ with models.DAG(
                 "username": "root",
                 "password": db_password,
                 "query": "SELECT * FROM customers WHERE load_timestamp > (SELECT last_processed_timestamp FROM watermarks WHERE table_name='customers');",
-                "outputTable": "datapipeline-468807:landingzone.clothing_db.customers",
+                "outputTable": "datapipeline-468807:landingzone.clothing_db_customers",
                 "bigQueryLoadingTemporaryDirectory": "gs://lcw-dataflow-temp-bucket",
                 "useColumnAlias": "false",
                 "isTruncate": "false",
